@@ -4,11 +4,11 @@ use rand::Rng;
 fn main() {
     println!("Creating random vector...");
     const MEBI: usize = 1024*1024;
-    let vector = create_rand_vec(32*MEBI, -128, 128);
+    let vector = create_rand_vec(16*MEBI, -128, 128);
     println!("Summing vector elements with a loop...");
     println!("  vector sum = {}", sum_vec_loop(&vector));
     println!("Summing vector elements with threads...");
-    println!("  vector sum = {}", sum_vec_threads(&vector, 5));
+    println!("  vector sum = {}", sum_vec_threads(&vector, 16));
 }
 
 // Creates a vector of indicated length filled with random numbers between min and max
@@ -33,43 +33,41 @@ fn sum_vec_loop(vector: &Vec<i32>) -> i32 {
 
 // Performs summation over an i32 vector using threads
 fn sum_vec_threads(vector: &Vec<i32>, thread_num: usize) -> i32 {
-    let mut children = vec![];
     let mut sum = 0;
     let thread_size = vector.len() / thread_num;
     assert!(thread_num < vector.len());
 
-    // Create all the threads
-    for i in 0..thread_num {
-        // Figure out which section of the vector this thread should sum up
-        let start = i * thread_size;
-        let end = if i == thread_num - 1 {
-            vector.len()
-        } else {
-            (i + 1) * thread_size
-        };
+    // Create a thread scope so that the rust compiler knows all threads will be joined
+    // by the end (this lets us borrow a reference to the vector inside of each thread)
+    thread::scope(|thread_scope| {
+        let mut children = vec![];
 
-        // Copy this section over to a new vector called sub_vector
-        // (I know this partially negates the speed that you gain with threads, but I couldn't figure out how
-        // to make it work otherwise. I tried using a reference to vector, but there was an issue with lifetimes.)
-        let mut sub_vector: Vec<i32> = vec![];
-        for j in start..end {
-            sub_vector.push(vector[j]);
+        // Create all the threads
+        for i in 0..thread_num {
+            // Figure out which section of the vector this thread should sum up
+            let start = i * thread_size;
+            let end = if i == thread_num - 1 {
+                vector.len()
+            } else {
+                (i + 1) * thread_size
+            };
+
+            // Run the thread to sum up this section of the vector
+            let child = thread_scope.spawn(move || {
+                let mut sub_sum = 0;
+                for j in start..end {
+                    sub_sum += vector[j];
+                }
+                sub_sum
+            });
+            children.push(child);
         }
 
-        // Run the thread to sum up this section of the vector
-        children.push(thread::spawn(move|| {
-            let mut sub_sum = 0;
-            for k in 0..sub_vector.len() {
-                sub_sum += sub_vector[k];
-            }
-            sub_sum
-        }));
-    }
-
-    // Get the sub sum from each thread
-    for child in children {
-        sum += child.join().unwrap();
-    }
+        // Get the sub sum from each thread
+        for child in children {
+            sum += child.join().unwrap();
+        }
+    });
 
     // Return the total sum
     sum
