@@ -2,10 +2,13 @@ use std::thread;
 use rand::Rng;
 
 fn main() {
+    println!("Creating random vector...");
     const MEBI: usize = 1024*1024;
-    let vector = create_rand_vec(8*MEBI, -128, 128);
-    println!("Sum of vector (loop): {}", sum_vec_loop(&vector));
-    println!("Sum of vector (threads): {}", sum_vec_threads(&vector, 5));
+    let vector = create_rand_vec(32*MEBI, -128, 128);
+    println!("Summing vector elements with a loop...");
+    println!("  vector sum = {}", sum_vec_loop(&vector));
+    println!("Summing vector elements with threads...");
+    println!("  vector sum = {}", sum_vec_threads(&vector, 5));
 }
 
 // Creates a vector of indicated length filled with random numbers between min and max
