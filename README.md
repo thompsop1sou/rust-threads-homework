@@ -1,5 +1,6 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/Ivy4qf8l)
-# c_rust_go_lab_5
+# Rust Threads Homework
+These Rust programs were created for a homework assignment. The original
+instructions are below.
 
 ## Program 1 
 Use threads to perform parallel computation.   Create a function that takes as
@@ -18,7 +19,9 @@ thread safe.
 ## Program 3
 For program 1, implement a generic binary search tree, similar to lab 3 (c).
 
-It is not required that this tree be balanced.   That would make the code much more complicated. Note, only implement In Order Traversal, omit the post and pre order traversals.
+It is not required that this tree be balanced. That would make the code much more
+complicated. Note, only implement In Order Traversal, omit the post and pre orde
+traversals.
 
 Thus the tree would have a new, insert, in order traversal and search
 methods.  If you want a challenge, implement the delete method.
